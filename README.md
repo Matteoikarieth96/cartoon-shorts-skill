@@ -111,6 +111,8 @@ skip into a failure).
 - [token-checkup](https://github.com/Matteoikarieth96/token-checkup-skill): a weekly token checkup for Claude Code: session size, what loads at session start, memory kept true
 - [portfolio-report](https://github.com/Matteoikarieth96/portfolio-report-skill): an English portfolio report and A4 one-pager from a Fineco export, with a switch to hide the amounts
 - [beer-can-label](https://github.com/Matteoikarieth96/beer-can-label-skill): a print-ready beer can label with a 3D can preview
+- [claude-time-is-relative](https://github.com/Matteoikarieth96/claude-time-is-relative): time estimates for Claude Code tasks, learned from your own past sessions
+- [ai-privacy-check](https://github.com/Matteoikarieth96/ai-privacy-check-skill): a first privacy and AI rules check for a concrete use case in Italy and the EU (in Italian)
 
 ## License
 
