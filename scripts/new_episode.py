@@ -1,12 +1,13 @@
 """Start a new episode of a cartoon-shorts series.
 
-    python3 scripts/new_episode.py <series folder> <episode-name> [--styles painted,toon] [--voice openai|say|espeak|file]
+    python3 scripts/new_episode.py <series folder> <episode-name> --voice openai|say|espeak|file [--styles painted,toon]
 
 Creates <series>/engine (a copy of this skill's engine, so later skill updates never break a finished episode) the
 first time, then <series>/episodes/<episode-name>/ from templates/episode with the chosen style modules switched on.
-Run it again with --update-engine to refresh the series' engine copy from the skill.
+Run it again with --update-engine to refresh the series' engine copy from the skill (only with the user's yes:
+the old copy is kept as engine.bak-<date>, and only a copy made by this script is ever replaced).
 """
-import argparse, json, os, re, shutil, sys
+import argparse, json, os, re, shutil, sys, time
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STYLES = ['toon', 'fx', 'anime', 'manga', 'paper', 'painted']
@@ -16,7 +17,8 @@ ap = argparse.ArgumentParser()
 ap.add_argument('series')
 ap.add_argument('episode')
 ap.add_argument('--styles', default='', help='comma list of ' + ', '.join(STYLES) + ' (empty = text and shapes only)')
-ap.add_argument('--voice', default='openai', choices=['openai', 'say', 'espeak', 'file'])
+ap.add_argument('--voice', required=True, choices=['openai', 'say', 'espeak', 'file'],
+                help='openai costs money and sends the script to OpenAI: only when the user chose it')
 ap.add_argument('--update-engine', action='store_true')
 a = ap.parse_args()
 
@@ -24,10 +26,16 @@ if not re.fullmatch(r'[a-z0-9][a-z0-9-]*', a.episode):
     sys.exit('episode name: lowercase letters, digits and dashes only')
 series = os.path.abspath(os.path.expanduser(a.series))
 eng = os.path.join(series, 'engine')
+MARK = '.cartoon-shorts-engine'      # written into every engine copy: only those are ever replaced
 if a.update_engine or not os.path.isdir(eng):
     if os.path.isdir(eng):
-        shutil.rmtree(eng)
+        if not os.path.exists(os.path.join(eng, MARK)):
+            sys.exit(f'{eng} was not made by this skill: not touching it. Pick another series folder.')
+        bak = eng + '.bak-' + time.strftime('%Y%m%d-%H%M%S')
+        os.rename(eng, bak)               # kept, never deleted: older episodes may need the old engine
+        print('old engine kept as', bak)
     shutil.copytree(os.path.join(SKILL, 'engine'), eng, ignore=shutil.ignore_patterns('__pycache__'))
+    open(os.path.join(eng, MARK), 'w').write('engine copy made by scripts/new_episode.py\n')
     print('engine copied to', eng)
 for f, text in (('.gitignore', '.env\nepisodes/*/audio/\nepisodes/*/out/\nepisodes/*/stills/\nepisodes/*/post/\n'),
                 ('.env.example', 'OPENAI_API_KEY=\n')):
@@ -49,7 +57,7 @@ for s in filter(None, a.styles.split(',')):
     if s == 'comic':
         s = 'toon'
     if s not in STYLES:
-        sys.exit(f'unknown style {s}: use {", ".join(STYLES)}')
+        sys.exit(f'unknown style {s}: use comic, anime, manga, paper or painted (leave --styles out for kinetic text)')
     want |= {s, *NEEDS.get(s, [])}
     if s == 'toon':
         want.add('fx')

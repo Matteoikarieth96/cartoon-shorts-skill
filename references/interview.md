@@ -24,19 +24,22 @@ After each round, say in one line what you understood. Write everything into `<s
    - **manga**: thick ink, huge grins, fountain tears, hatching, sound words (hype, rivalry, comedy)
    - **paper**: torn cut-paper dioramas lit like a film, silhouettes (history, memory, poignant stories)
    - **painted**: soft storybook painting, clouds and hills, warm kitchens, glossy food (recipes, travel, cosy)
-   - **kinetic**: big animated type and shapes, no characters (tips, numbers, lists, quotes)
+   - **kinetic**: big animated type and shapes, no characters (tips, numbers, lists, quotes); no style
+     module and no gallery still: it is the template itself (`new_episode.py` without `--styles`)
    Styles can mix inside one video (e.g. painted world + kinetic numbers). Offer to render one test still
    in two candidate styles when the user cannot choose.
 6. **Length.** 15 to 30 s (one idea, loops well), 30 to 60 s (a full mini story: the sweet spot),
    60 to 90 s (a recipe or a story with three beats). Under 60 s is safest for every platform.
-7. **Narrator.** External voice in third person (storyteller), a character in first person (a cook,
-   a coach, the hero), or text only with music.
+7. **Narrator.** External voice in third person (storyteller), an invented character in first person (a cook,
+   a coach, the hero), or text only with music. A real person is never the first-person narrator.
 8. **Brand.** Series name or handle on screen? Colours or a logo to use? A recurring series tag?
 
-## Round 3: voice and sound (when it matters)
+## Round 3: voice and sound (always ask the voice)
 
-9. **Voice engine.** OpenAI voices (best; needs an API key; about 1 to 3 cents per minute), the computer's
-   own voices (free, more robotic), or the user's own recordings (one file per line, `rec/line_00.wav`).
+9. **Voice engine.** Never assume it. OpenAI voices (best; needs the user's own API key; about 1.5 US cents
+   per minute, see openai.com/api/pricing; the script text goes to OpenAI; platforms and OpenAI's policies ask you
+   to say the voice is AI-generated), the computer's own voices (free, local, more robotic), or the user's own
+   recordings (free, local; one file per line, `rec/line_00.wav`).
    OpenAI voices to suggest: `onyx` (deep, dramatic narrator), `coral` (warm, friendly), `nova` (bright),
    `sage` (calm), `ash` (casual), `ballad` (soft, storyteller). Describe the character in `instructions`:
    age, warmth, accent, energy. Offer to voice line 1 in two voices so the user can listen.
@@ -47,7 +50,8 @@ After each round, say in one line what you understood. Write everything into `<s
 ## Round 4: content rules (when it matters)
 
 11. **Must be in, must stay out.** Facts, moments, quotes, names the user wants or refuses. Real people or
-    brands involved? (respectful caricatures only, no logos, sourced facts, fan-made line in the description)
+    brands involved? (respectful caricatures only, sourced facts, verbatim quotes, no logos, kits or characters of
+    others: a fan-made line in the description does not make those fine)
 12. **Ending.** A question to the audience ("which country next?"), a recap card to screenshot
     (how-tos: all ingredients and steps, hold about 5 s), a loop back into the opening, a follow CTA,
     or an indirect moral (show it, do not preach it). Series: make the ending a fixed ritual.

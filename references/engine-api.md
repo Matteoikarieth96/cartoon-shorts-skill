@@ -73,7 +73,9 @@ window.buildEpisode = (world, S) => {
 ```
 - `scene(world, id, transition)` returns `{id, div, svg, defs, cam}`. The scene is visible only between its start
   and the next scene's start (from the timeline). Its id must exist in short.json.
-- `ov(sc, html, css, k, on, cls)` adds an absolutely placed HTML element (text, cards) on top of the SVG.
+- `ov(sc, html, css, k, on, cls)` adds an absolutely placed HTML element (text, cards) on top of the SVG. The html is
+  trusted markup only: names, quotes and titles from research or the user go through `S.esc(text)`, or use
+  `ovText(sc, text, css, k, on, cls)`, which sets plain text. Captions are escaped by the engine.
 - `E(tag, attrs, parent)` makes an SVG element; `tr(el, x, y, scale, rot)` sets its transform.
 - `live(sc, fn(g, t), a, b)` redraws layer `g` from scratch on every frame of the scene (use it for busts and
   props whose `draw()` rebuilds the SVG; it also clears the clip paths the previous frame left in `<defs>`).

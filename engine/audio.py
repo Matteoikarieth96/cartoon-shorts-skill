@@ -67,35 +67,63 @@ def fetch_openai(spec, text, raw):
     raise last
 
 
+def tempo(spec):
+    """Speed factor for ffmpeg's atempo: a plain number from 0.5 to 2 (it goes into a filter string, so nothing else)."""
+    t = spec.get('tempo', 1.0)
+    if isinstance(t, bool) or not isinstance(t, (int, float)) or not 0.5 <= t <= 2.0:
+        raise SystemExit(f'tempo must be a number from 0.5 to 2, got {t!r}')
+    return float(t)
+
+
+def rec_dir(spec):
+    """Folder of the user's own recordings: a relative path inside the episode folder."""
+    rec = spec.get('dir', 'rec')
+    if not isinstance(rec, str) or os.path.isabs(rec) or '..' in rec.replace('\\', '/').split('/'):
+        raise SystemExit(f'voice "dir" must be a folder inside the episode, got {rec!r}')
+    return rec
+
+
+def text_file(path, text):
+    """The line goes to say / espeak-ng through a file, so a line starting with '-' is never read as an option."""
+    p = path + '.txt'
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(text)
+    return p
+
+
 def synth(spec, text, path, i=0):
     if spec['engine'] == 'file':
         # your own recordings: rec/line_00.wav (or .m4a/.mp3/.aiff), one file per line, silence trimmed like the TTS clips
-        rec = spec.get('dir', 'rec')
+        rec = rec_dir(spec)
         src = next((os.path.join(rec, f'line_{i:02d}{ext}') for ext in ('.wav', '.m4a', '.mp3', '.aiff', '.flac') if os.path.exists(os.path.join(rec, f'line_{i:02d}{ext}'))), None)
         if not src:
             raise RuntimeError(f'missing recording {rec}/line_{i:02d}.wav')
         trim = 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02'
-        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', src, '-af', f"{trim},areverse,{trim},areverse,atempo={spec.get('tempo', 1.0)},aresample={SR}", '-ac', '1', path], check=True)
+        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', src, '-af', f"{trim},areverse,{trim},areverse,atempo={tempo(spec)},aresample={SR}", '-ac', '1', path], check=True)
         return
     if spec['engine'] == 'say' and not shutil.which('say'):
         # macOS voice asked for on another system: use espeak-ng instead of failing
         spec = {'engine': 'espeak', 'voice': 'en-us', 'rate': spec.get('rate', 165)}
     if spec['engine'] == 'espeak':
         tmp = path + '.raw.wav'
-        subprocess.run(['espeak-ng', '-v', spec.get('voice', 'en-us'), '-s', str(spec.get('rate', 165)), '-w', tmp, text], check=True)
+        txt = text_file(path, text)
+        subprocess.run(['espeak-ng', '-v', spec.get('voice', 'en-us'), '-s', str(spec.get('rate', 165)), '-w', tmp, '-f', txt], check=True)
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', tmp, '-af', f'aresample={SR}', '-ac', '1', path], check=True)
         os.remove(tmp)
+        os.remove(txt)
         return
     if spec['engine'] == 'say':
-        subprocess.run(['say', '-v', spec['voice'], '-r', str(spec.get('rate', 185)), '-o', path, '--file-format=WAVE',
-                        f'--data-format=LEI16@{SR}', text], check=True)
+        txt = text_file(path, text)
+        subprocess.run(['say', '-v', spec.get('voice', 'Samantha'), '-r', str(spec.get('rate', 185)), '-o', path, '--file-format=WAVE',
+                        f'--data-format=LEI16@{SR}', '-f', txt], check=True)
+        os.remove(txt)
         return
     raw = 'audio/raw_' + hashlib.sha1((json.dumps({k: v for k, v in spec.items() if k != 'tempo'}, sort_keys=True) + '|' + text).encode()).hexdigest()[:12] + '.wav'
     if not os.path.exists(raw):
         fetch_openai(spec, text, raw)
     trim = 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02'
     subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', raw, '-af',
-                    f"{trim},areverse,{trim},areverse,atempo={spec.get('tempo', 1.0)},aresample={SR}", '-ac', '1', path], check=True)
+                    f"{trim},areverse,{trim},areverse,atempo={tempo(spec)},aresample={SR}", '-ac', '1', path], check=True)
 
 
 def line_spec(base, ln):
@@ -115,7 +143,7 @@ def voice_lines(base):
         spec = line_spec(base, ln)
         stamp = ''
         if spec['engine'] == 'file':
-            rec = spec.get('dir', 'rec')
+            rec = rec_dir(spec)
             stamp = '|'.join(str(os.path.getmtime(os.path.join(rec, f))) for f in sorted(os.listdir(rec)) if f.startswith(f'line_{i:02d}.')) if os.path.isdir(rec) else ''
         key = hashlib.sha1((json.dumps(spec, sort_keys=True) + '|' + ln['say'] + stamp).encode()).hexdigest()[:12]
         p = f'audio/line_{i:02d}_{key}.wav'

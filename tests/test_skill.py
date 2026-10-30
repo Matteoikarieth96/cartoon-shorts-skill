@@ -65,6 +65,9 @@ def node22():
 
 AUDIO_OK = has_numpy() and shutil.which('ffmpeg') and shutil.which('ffprobe')
 RENDER_OK = AUDIO_OK and node22() and chrome()
+LOCAL_VOICE = 'say' if shutil.which('say') else ('espeak' if shutil.which('espeak-ng') else None)
+if os.environ.get('REQUIRE_PIPELINE') and not RENDER_OK:
+    raise RuntimeError('REQUIRE_PIPELINE is set but numpy, ffmpeg, Node 22+ or Chrome is missing')
 
 
 def tone(path, sec=1.0, f=220.0, sr=44100):
@@ -183,6 +186,27 @@ class Scaffold(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertEqual(read(p), '// mine')
 
+    def test_voice_must_be_chosen(self):
+        r = run([PY, os.path.join(ROOT, 'scripts', 'new_episode.py'), self.series, 'ep'])
+        self.assertNotEqual(r.returncode, 0)
+        self.assertFalse(os.path.exists(os.path.join(self.series, 'episodes', 'ep')))
+
+    def test_update_engine_never_touches_a_foreign_engine_folder(self):
+        os.makedirs(os.path.join(self.series, 'engine'))
+        write(os.path.join(self.series, 'engine', 'main.c'), 'int main;')
+        r = run([PY, os.path.join(ROOT, 'scripts', 'new_episode.py'), self.series, 'ep', '--voice', 'file', '--update-engine'])
+        self.assertNotEqual(r.returncode, 0)
+        self.assertEqual(read(os.path.join(self.series, 'engine', 'main.c')), 'int main;')
+
+    def test_update_engine_keeps_the_old_copy(self):
+        self.assertEqual(new_episode(self.series, 'one').returncode, 0)
+        r = run([PY, os.path.join(ROOT, 'scripts', 'new_episode.py'), self.series, 'two', '--voice', 'file', '--update-engine'])
+        self.assertEqual(r.returncode, 0, r.stderr)
+        baks = [d for d in os.listdir(self.series) if d.startswith('engine.bak-')]
+        self.assertEqual(len(baks), 1)
+        self.assertTrue(os.path.exists(os.path.join(self.series, baks[0], 'render.mjs')))
+        self.assertTrue(os.path.exists(os.path.join(self.series, 'engine', '.cartoon-shorts-engine')))
+
     def test_existing_env_files_are_kept(self):
         os.makedirs(self.series)
         write(os.path.join(self.series, '.gitignore'), 'custom\n')
@@ -251,10 +275,107 @@ class Pipeline(unittest.TestCase):
                     'tiktok/caption.txt', 'tiktok/cover.jpg', 'instagram/cover.jpg', 'checklist.md'):
             self.assertTrue(os.path.getsize(os.path.join(self.ep, 'post', rel)) > 0, rel)
 
+    def variant(self, name, short=None, post=None, scenes_extra=None, voice=False):
+        """A copy of the demo episode with changes; voice=True re-runs audio.py (needed when captions change)."""
+        d = os.path.join(self.series, 'episodes', name)     # pages load ../../engine, so copies live next to the demo
+        shutil.copytree(self.ep, d)
+        for fname, fn in (('short.json', short), ('post.json', post)):
+            if fn:
+                cfg = load(os.path.join(d, fname))
+                fn(cfg)
+                dump(cfg, os.path.join(d, fname))
+        if scenes_extra:
+            write(os.path.join(d, 'scenes.js'), read(os.path.join(d, 'scenes.js')) + scenes_extra)
+        if voice:
+            r = run([PY, os.path.join(self.series, 'engine', 'audio.py'), d])
+            self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        return d
+
+    def test_tempo_cannot_inject_ffmpeg_filters(self):
+        target = os.path.join(self.tmp, 'pwn.txt')
+        def bad(cfg):
+            cfg['voice']['tempo'] = f'1.0,ametadata=mode=print:file={target}'
+        d = self.variant('bad-tempo', short=bad)
+        r = run([PY, os.path.join(self.series, 'engine', 'audio.py'), d])
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('tempo', r.stderr + r.stdout)
+        self.assertFalse(os.path.exists(target))
+
+    def test_recordings_folder_must_be_inside_the_episode(self):
+        def bad(cfg):
+            cfg['voice']['dir'] = '../../outside'
+        d = self.variant('bad-dir', short=bad)
+        r = run([PY, os.path.join(self.series, 'engine', 'audio.py'), d])
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('dir', r.stderr + r.stdout)
+
+    @unittest.skipUnless(LOCAL_VOICE, 'needs macOS say or espeak-ng')
+    def test_line_starting_with_a_dash_is_spoken_not_parsed(self):
+        def dash(cfg):
+            cfg['voice'] = {'engine': LOCAL_VOICE}
+            cfg['fallback'] = {'engine': LOCAL_VOICE}
+            cfg['lines'] = cfg['lines'][:1]
+            cfg['lines'][0]['say'] = '-40 degrees tonight'
+            cfg['score'], cfg['sfx'] = [], []
+        d = self.variant('dash', short=dash)
+        r = run([PY, os.path.join(self.series, 'engine', 'audio.py'), d])
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        self.assertNotIn('WARNING', r.stdout)
+
+    @unittest.skipUnless(RENDER_OK, 'needs Node 22+ and Chrome or Chromium')
+    def test_caption_markup_is_shown_as_text_not_run(self):
+        def cap(cfg):
+            cfg['lines'][0]['cap'] = '<img src=x onerror="throw new Error(\'INJECTED\')">Hi'
+        d = self.variant('xss', short=cap, voice=True)
+        r = run(['node', os.path.join(self.series, 'engine', 'render.mjs'), d, 'still', '0.5'], timeout=120)
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        self.assertNotIn('INJECTED', r.stderr + r.stdout)
+
+    @unittest.skipUnless(RENDER_OK, 'needs Node 22+ and Chrome or Chromium')
+    def test_page_cannot_read_local_files(self):
+        probe = ("\nconst __build = window.buildEpisode;\n"
+                 "window.buildEpisode = (w, S) => {\n"
+                 "  let read = false;\n"
+                 "  try { const x = new XMLHttpRequest(); x.open('GET', location.href.replace(/[^/]*$/, 'short.json'), false); x.send(); read = x.responseText.length > 0; } catch (e) {}\n"
+                 "  if (read) throw new Error('FILE_READ');\n"
+                 "  return __build(w, S);\n"
+                 "};\n")
+        d = self.variant('fileread', scenes_extra=probe)
+        r = run(['node', os.path.join(self.series, 'engine', 'render.mjs'), d, 'still', '1'], timeout=120)
+        self.assertNotIn('FILE_READ', r.stderr + r.stdout)
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+
+    @unittest.skipUnless(RENDER_OK, 'needs Node 22+ and Chrome or Chromium')
+    def test_contact_sheet_is_written(self):
+        r = run(['node', os.path.join(self.series, 'engine', 'render.mjs'), self.ep, 'sheet', '2'], timeout=180)
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        self.assertGreater(os.path.getsize(os.path.join(self.ep, 'stills', 'sheet.png')), 1000)
+
+    @unittest.skipUnless(RENDER_OK, 'needs Node 22+ and Chrome or Chromium')
+    def test_openai_voice_gets_the_ai_line_and_labels(self):
+        def openai(cfg):
+            cfg['voice'] = {'engine': 'openai', 'voice': 'coral'}     # kit only reads the engine name: no API call
+        d = self.variant('ai-voice', short=openai, post=lambda c: c.update(thumb_t=1))
+        r = run([PY, os.path.join(self.series, 'engine', 'kit.py'), d])
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        self.assertIn('AI-generated', read(os.path.join(d, 'post', 'youtube', 'description.txt')))
+        self.assertIn('AI', read(os.path.join(d, 'post', 'tiktok', 'caption.txt')))
+        self.assertIn('on (AI voice)', read(os.path.join(d, 'post', 'checklist.md')))
+
+    def test_kit_refuses_bad_lang_thumb_and_too_many_hashtags(self):
+        self.assertEqual(self.audio.returncode, 0)
+        for name, change, word in (('lang', {'lang': '../../escape'}, 'lang'), ('thumb', {'thumb_t': '1/../../x'}, 'thumb_t'),
+                                   ('tags', {'hashtags': ['a', 'b', 'c', 'd', 'e', 'f']}, 'hashtags')):
+            d = self.variant('kit-' + name, post=lambda c, ch=change: c.update(ch))
+            r = run([PY, os.path.join(self.series, 'engine', 'kit.py'), d])
+            self.assertNotEqual(r.returncode, 0, name)
+            self.assertIn(word, r.stderr, name)
+        self.assertFalse(os.path.exists(os.path.join(self.tmp, 'escape')))
+
     @unittest.skipUnless(RENDER_OK, 'needs Node 22+ and Chrome or Chromium')
     def test_page_error_fails_the_render(self):
         self.assertEqual(self.audio.returncode, 0)
-        d = os.path.join(self.tmp, 'broken')
+        d = os.path.join(self.series, 'episodes', 'broken')
         shutil.copytree(self.ep, d)
         write(os.path.join(d, 'scenes.js'), "window.buildEpisode = () => { throw new Error('boom'); };\n")
         r = run(['node', os.path.join(self.series, 'engine', 'render.mjs'), d, 'still', '1'], timeout=120)
@@ -262,7 +383,7 @@ class Pipeline(unittest.TestCase):
 
     def test_kit_refuses_long_title(self):
         self.assertEqual(self.audio.returncode, 0)
-        d = os.path.join(self.tmp, 'long-title')
+        d = os.path.join(self.series, 'episodes', 'long-title')
         shutil.copytree(self.ep, d)
         post = load(os.path.join(d, 'post.json'))
         post['title'] = 'x' * 101

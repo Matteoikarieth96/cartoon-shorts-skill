@@ -9,7 +9,7 @@ window.buildEpisode = (world, S) => {
 
   // cast: three original faces with contrasting heads, noses, hair and outfits
   const COOK = { head: 'lean', nose: 'small', skin: '#f6c99c', skinS: '#dd9a68', hair: '#2a1a12', hairS: '#120a06', hairH: '#6e4a34', hairStyle: 'spiky',
-    eyeW: 56, eyeH: 30, eyeGap: 52, pupil: 12, mouthW: 1.05, outfit: 'kit', shirt: '#f4f1e8', shirtS: '#c9c2b2', trim: '#e23b2e' };
+    eyeW: 56, eyeH: 30, eyeGap: 52, pupil: 12, mouthW: 1.05, outfit: 'kit', shirt: '#f4f1e8', shirtS: '#c9c2b2', trim: '#2a7de1' };
   const JUDGE = { head: 'square', nose: 'long', skin: '#efc093', skinS: '#cf8d5a', hair: '#e2e4ea', hairS: '#959cab', hairH: '#ffffff', hairStyle: 'swept',
     eyeW: 48, eyeH: 26, eyeGap: 54, pupil: 9, age: 1, glasses: true, frame: '#2a2226', outfit: 'suit', suit: '#5a1e2e', suitS: '#3a111d', tie: '#ffc93c' };
   const FAN = { head: 'round', nose: 'wide', skin: '#9a6644', skinS: '#74462c', blushC: '#d0604c', hair: '#1a120e', hairS: '#000', hairH: '#4f4038', hairStyle: 'buzz',
@@ -18,10 +18,10 @@ window.buildEpisode = (world, S) => {
   // draw() rebuilds the bust every call: S.live() redraws a layer each frame and clears the defs it left
   const live = S.live;
   const bust = (g, look, x, y, s, ex) => new M.Bust(g, look).draw(x, y, s, ex);
-  // the cook's red headband, drawn in head units on the bust's own group (b.g) so it follows tilt and scale
+  // the cook's blue headband, drawn in head units on the bust's own group (b.g) so it follows tilt and scale
   function band(b) {
-    E('path', { d: 'M -128 -132 Q 0 -168 128 -132 L 126 -100 Q 0 -134 -126 -100 Z', fill: '#e23b2e', stroke: INK, 'stroke-width': 5, 'stroke-linejoin': 'round' }, b.g);
-    E('path', { d: 'M 120 -120 L 176 -150 L 168 -112 Z M 120 -112 L 170 -92 L 150 -76 Z', fill: '#e23b2e', stroke: INK, 'stroke-width': 4.5, 'stroke-linejoin': 'round' }, b.g);
+    E('path', { d: 'M -128 -132 Q 0 -168 128 -132 L 126 -100 Q 0 -134 -126 -100 Z', fill: '#2a7de1', stroke: INK, 'stroke-width': 5, 'stroke-linejoin': 'round' }, b.g);
+    E('path', { d: 'M 120 -120 L 176 -150 L 168 -112 Z M 120 -112 L 170 -92 L 150 -76 Z', fill: '#2a7de1', stroke: INK, 'stroke-width': 4.5, 'stroke-linejoin': 'round' }, b.g);
     return b;
   }
   const burst = (g, c0, c1, cx, cy) => E('rect', { width: 1080, height: 1920, fill: FX.rad(g, [[0, c0], [1, c1]], cx / 1080, cy / 1920, .75) }, g);

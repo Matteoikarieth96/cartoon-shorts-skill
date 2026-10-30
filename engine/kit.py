@@ -3,7 +3,7 @@
     python3 engine/kit.py episodes/<name>
 
 Reads episodes/<name>/post.json and timeline.json, writes episodes/<name>/post/:
-  youtube/   title.txt, description.txt, tags.txt, captions.<lang>.srt, thumbnail.jpg (2160 x 3840), upload.md
+  youtube/   title.txt, description.txt, tags.txt, captions.<lang>.srt, thumbnail.jpg (2160 x 3840)
   tiktok/    caption.txt, cover.jpg
   instagram/ caption.txt, cover.jpg
   checklist.md   what to set on each platform, with the limits checked
@@ -21,10 +21,12 @@ post.json keys:
   labels         optional dict to translate the fixed words: {"sources": "Sources"}
   thumb_t        second of the video to use as thumbnail and cover (render it without captions)
   category       YouTube category to suggest, default "Entertainment"
-  ai_label       true if the video should be marked as AI-generated or altered content (voice clones, realistic people)
+  ai_label       mark the video as AI-generated or altered content; default: true with an OpenAI voice, else false
+  ai_voice_note  false to leave out the "AI-generated voice" line an OpenAI voice adds (only if you disclose it elsewhere)
+  ai_voice_line  wording of that line
 
 Refuses text the platforms reject or that reads badly: < or > in YouTube text, a title over 100 characters,
-a YouTube description over 5000, tags over 500, captions over 2200, more than 30 hashtags on Instagram.
+a YouTube description over 5000, tags over 500, captions over 2200, more than 5 hashtags (Instagram's limit), a lang that is not a language code, a thumb_t outside the video.
 """
 import json, os, re, subprocess, sys
 
@@ -32,8 +34,17 @@ root = os.path.abspath(sys.argv[1])
 home = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cfg = json.load(open(os.path.join(root, 'post.json')))
 tl = json.load(open(os.path.join(root, 'timeline.json')))
-say = [ln['say'] for ln in json.load(open(os.path.join(root, 'short.json')))['lines']]
+short = json.load(open(os.path.join(root, 'short.json')))
+say = [ln['say'] for ln in short['lines']]
 lang = cfg.get('lang', 'en')
+if not re.fullmatch(r'[a-z]{2,3}(-[A-Za-z0-9]{2,8})?', str(lang)):
+    sys.exit(f'lang must be a language code like "en" or "pt-BR", got {lang!r}')
+thumb_t = cfg.get('thumb_t', 1)
+if isinstance(thumb_t, bool) or not isinstance(thumb_t, (int, float)) or not 0 <= thumb_t <= tl['total']:
+    sys.exit(f'thumb_t must be a number of seconds inside the video, got {thumb_t!r}')
+# an OpenAI voice is AI-generated: OpenAI's usage policies ask creators to tell listeners, and platforms label it
+ai_voice = (short.get('voice') or {}).get('engine') == 'openai'
+ai = cfg.get('ai_label', ai_voice)
 lab = {'sources': 'Sources', **cfg.get('labels', {})}
 out = os.path.join(root, 'post')
 for d in ('youtube', 'tiktok', 'instagram'):
@@ -46,10 +57,12 @@ if cfg.get('sources'):
     desc += f"\n\n{lab['sources']}:\n" + '\n'.join('- ' + s for s in cfg['sources'])
 if cfg.get('disclaimer'):
     desc += '\n\n' + cfg['disclaimer']
+if ai_voice and cfg.get('ai_voice_note', True):
+    desc += '\n\n' + cfg.get('ai_voice_line', 'Voice-over: AI-generated (text to speech).')
 desc += '\n\n' + ' '.join(tags_h)
 yt_tags = ', '.join(cfg.get('tags', []))
 hook = cfg.get('hook', re.sub(r'\s*#\S+', '', title).strip())
-social = hook + ('\n\n' + cfg['social'] if cfg.get('social') else '') + '\n\n' + ' '.join(tags_h)
+social = hook + ('\n\n' + cfg['social'] if cfg.get('social') else '') + ('\n\n' + cfg.get('ai_voice_line', 'AI voice-over.') if ai_voice and cfg.get('ai_voice_note', True) else '') + '\n\n' + ' '.join(tags_h)
 
 checks = [('YouTube title', title, 100), ('YouTube description', desc, 5000), ('YouTube tags', yt_tags, 500),
           ('TikTok caption', social, 2200), ('Instagram caption', social, 2200)]
@@ -59,8 +72,8 @@ for name, text, limit in checks:
 for name, text in (('YouTube title', title), ('YouTube description', desc)):
     if re.search('[<>]', text):
         sys.exit(f'{name} has < or > (YouTube Studio rejects them)')
-if len(tags_h) > 30:
-    sys.exit('Instagram allows at most 30 hashtags')
+if len(tags_h) > 5:
+    sys.exit(f'{len(tags_h)} hashtags: use 3 to 5 (Instagram now accepts at most 5 per post)')
 
 
 def w(rel, text):
@@ -88,7 +101,7 @@ for k, ln in enumerate(tl['lines']):
 w(f'youtube/captions.{lang}.srt', '\n'.join(srt))
 
 # thumbnail and covers: one still at 2x without the burned-in captions
-t = str(cfg.get('thumb_t', 1))
+t = str(thumb_t)
 env = dict(os.environ, DSF='2', HIDE='#cap')
 subprocess.run(['node', os.path.join(home, 'engine', 'render.mjs'), root, 'still', t], check=True, env=env, stdout=subprocess.DEVNULL)
 still = os.path.join(root, 'stills', f't{t}.png')
@@ -101,7 +114,6 @@ try:
     dur = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', mp4], stderr=subprocess.DEVNULL).decode())
 except Exception:          # no video yet, or one still being written
     dur = tl['total']
-ai = cfg.get('ai_label', False)
 md = f"""# Upload checklist: {title}
 
 Video: `out/{os.path.basename(mp4)}` ({dur:.1f} s, 1080 x 1920, 9:16). The same file goes to all three platforms.
@@ -112,18 +124,23 @@ Video: `out/{os.path.basename(mp4)}` ({dur:.1f} s, 1080 x 1920, 9:16). The same 
 - Tags ({len(yt_tags)}/500): `youtube/tags.txt`
 - Thumbnail: `youtube/thumbnail.jpg` (a custom Shorts thumbnail is set from YouTube Studio on desktop)
 - Subtitles: upload `youtube/captions.{lang}.srt`
-- Category: {cfg.get('category', 'Entertainment')}; audience: not made for kids, unless it is
-- Altered or synthetic content: {'Yes' if ai else 'suggested No: a cartoon is not realistic footage. Say Yes if it shows realistic people or cloned voices'}
+- Category: {cfg.get('category', 'Entertainment')}
+- Audience: decide "made for kids" on purpose. Animation, bright colours and simple stories count towards "made for kids"
+  under YouTube's rules (COPPA), and a wrong answer can bring penalties; see YouTube Help, "Determining if your content is made for kids"
+- Altered or synthetic content: {'Yes (AI voice)' if ai else 'No for a stylised cartoon with a recorded or plainly robotic voice; Yes if it shows realistic people or an AI or cloned voice'}
+- Paid promotion: tick it if a brand paid for or gave anything for this video
 
 ## TikTok
 - Caption ({len(social)}/2200): `tiktok/caption.txt`
 - Cover: pick the frame or upload `tiktok/cover.jpg`
-- AI-generated content label: {'on' if ai else 'turn it on if the video shows realistic people or cloned voices'}
+- AI-generated content label: {'on (AI voice)' if ai else 'turn it on if the video has an AI voice or shows realistic people'}
+- Branded content toggle: on if a brand paid for or gave anything for this video
 
 ## Instagram Reels
-- Caption ({len(social)}/2200, {len(tags_h)}/30 hashtags): `instagram/caption.txt`
-- Cover: `instagram/cover.jpg`; check the 4:5 crop in the profile grid (centre of the frame)
-- AI info label: {'on' if ai else 'as for TikTok'}
+- Caption ({len(social)}/2200, {len(tags_h)}/5 hashtags): `instagram/caption.txt`
+- Cover: `instagram/cover.jpg`; check the 3:4 crop in the profile grid (about the centre 1080 x 1440 of the frame)
+- AI info label: {'on (AI voice)' if ai else 'as for TikTok'}
+- Paid partnership label: on if a brand paid for or gave anything for this video
 
 ## Before posting
 - Watch the whole video once with sound.

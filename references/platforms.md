@@ -10,16 +10,21 @@ Limits change: check the platform's help pages when a number matters. As of 2026
 |---|---|---|---|
 | Length | up to 3 min counts as a Short | up to 10 min upload | up to 3 min (longer goes to video) |
 | Sweet spot | 30 to 60 s | 20 to 60 s | 15 to 60 s |
-| Title / caption | title 100 chars, description 5000 | caption 2200 chars (the kit's limit) | caption 2200, max 30 hashtags |
-| Cover | custom thumbnail from Studio on desktop | pick a frame or upload | cover image; the grid shows a 4:5 crop |
+| Title / caption | title 100 chars, description 5000 | caption 2200 chars (the kit's limit) | caption 2200, max 5 hashtags (since December 2025) |
+| Cover | custom thumbnail from Studio on desktop | pick a frame or upload | cover image; the grid shows a 3:4 crop |
 | Captions file | .srt upload | auto captions | auto captions |
-| AI label | "altered or synthetic content" for realistic people or events | AI-generated content toggle | AI info label |
+| AI label | "altered or synthetic content" for realistic people, events or AI voices | AI-generated content toggle | AI info label |
+
+With an OpenAI voice the kit adds an "AI-generated voice" line to every text and the checklist turns the labels on:
+OpenAI's usage policies ask creators to tell listeners the voice is AI-generated, and TikTok asks for a label on
+realistic AI audio. YouTube's "made for kids" setting: animation and simple stories count towards it (COPPA);
+decide it on purpose, the checklist links the rule. Paid or gifted promotion gets each platform's paid label.
 
 ## Safe areas
 
-The bottom 300 px (account name, caption, music) and the right 120 px (buttons) are covered on all three.
-TikTok covers a bit more at the bottom than YouTube. Keep titles in y 200 to 1300 and captions in 1340 to 1560.
-The Instagram grid shows the centre 1080 x 1350: put the subject in the middle of the cover frame.
+Roughly the bottom 300 px (account name, caption, music) and the right 120 px (buttons) are covered on all three
+(an approximation from the apps' layouts, which change; TikTok covers a bit more at the bottom, so leave margin). Keep titles in y 200 to 1300 and captions in 1340 to 1560.
+The Instagram grid shows about the centre 1080 x 1440 (3:4): put the subject in the middle of the cover frame.
 
 ## Hashtags
 

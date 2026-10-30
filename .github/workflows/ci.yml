@@ -24,8 +24,8 @@ jobs:
       - name: Tools
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q ffmpeg
-          python3 -m pip install numpy
+          sudo apt-get install -y -q ffmpeg espeak-ng
+          python3 -m pip install numpy==2.3.4
           # headless Chrome on Ubuntu 24.04 needs unprivileged user namespaces for its sandbox
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           google-chrome --version
@@ -34,4 +34,6 @@ jobs:
           for f in engine/*.mjs engine/*.js engine/styles/*.js; do node --check "$f"; done
           python3 -m py_compile engine/*.py scripts/*.py
       - name: Tests
+        env:
+          REQUIRE_PIPELINE: "1"
         run: python3 -m unittest discover -s tests -v

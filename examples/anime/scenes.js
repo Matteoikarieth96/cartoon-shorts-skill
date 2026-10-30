@@ -55,7 +55,7 @@ window.buildEpisode = (world, S) => {
   }
   const LOOK = {
     skin: '#fde3d0', skinS: '#eab49e', blushC: '#f2708a',
-    hair: '#3d2f63', hairS: '#241b42', hairH: '#8c7cc4', hairStyle: 'long',
+    hair: '#7a4a2a', hairS: '#4e2c16', hairH: '#c48a5c', hairStyle: 'long',
     iris: '#3f63b0', irisL: '#a6d8ff', eyeW: 76, eyeH: 62, eyeGap: 54, lash: 1, jaw: 0,
     shirt: '#f4a9bb', shirtS: '#d9849c', trim: '#fff6ec',
   };

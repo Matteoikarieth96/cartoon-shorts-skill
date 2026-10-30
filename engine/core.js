@@ -129,7 +129,7 @@
         const a = ln.t + ln.d * acc / total;
         acc += weight(g);
         const b = k === groups.length - 1 ? Math.min(nextT, ln.t + ln.d + .45) : ln.t + ln.d * acc / total;
-        chunks.push({a, b, html: g.map(w => w.hi ? `<b>${w.txt}</b>` : w.txt).join(' ')});
+        chunks.push({a, b, html: g.map(w => w.hi ? `<b>${esc(w.txt)}</b>` : esc(w.txt)).join(' ')});
       });
     });
     let shown = null;
@@ -182,7 +182,11 @@
     svg.defs = defs;                              // fx.js gradients look for svg.defs
     return {id, div, svg, defs, cam: E('g', {}, svg)};
   }
-  // HTML overlay on a scene: ov(sc, '<b>Hi</b>', 'left:0;right:0;top:300px;text-align:center', 'slam@L0', 'L0..L2e', 'title')
+  // escape text for HTML: captions, and any text from research or the user that goes into ov()
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
+  // plain-text overlay: same as ov() but the text is never read as HTML (use it for names, quotes, titles from research)
+  const ovText = (sc, text, css, k = '', on = '', cls = '') => { const d = ov(sc, '', css, k, on, cls); d.textContent = text; return d; };
+  // HTML overlay on a scene (trusted markup only; wrap outside text in esc()): ov(sc, '<b>Hi</b>', 'left:0;right:0;top:300px;text-align:center', 'slam@L0', 'L0..L2e', 'title')
   function ov(sc, html, css, k = '', on = '', cls = '') {
     const d = document.createElement('div');
     d.className = 'a' + (cls ? ' ' + cls : ''); d.innerHTML = html; d.style.cssText = css;
@@ -217,7 +221,7 @@
     for (const f of ups) f(t);
   };
   window.Short = {
-    T, add, ups, clamp, eout, eio, counter, typer, during, TL, sceneById, E, tr, scene, ov, camera, prog, live,
+    T, add, ups, clamp, eout, eio, counter, typer, during, TL, sceneById, E, tr, scene, ov, ovText, esc, camera, prog, live,
     line: i => TL.lines[i],
     shake: (at, dur = .4, amp = 22) => shakes.push([T(at), dur, amp]),
     filter: (at, dur, css) => filters.push([T(at), dur, css]),

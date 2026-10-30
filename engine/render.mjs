@@ -28,8 +28,11 @@ const OUT = process.env.OUT ? resolve(process.env.OUT) : join(SHORT, 'out', `${N
 const WORKERS = mode === 'full' ? Math.max(1, Math.floor(+(process.env.WORKERS || 4))) : 1;
 
 // never leave a headless Chrome behind: whatever ends this process (an error in the page, Ctrl-C) kills them all
-const CHROMES = new Set();
-process.on('exit', () => { for (const c of CHROMES) if (c.exitCode === null && !c.signalCode) c.kill('SIGKILL'); });
+const CHROMES = new Set(), PROFILES = new Set();
+process.on('exit', () => {
+  for (const c of CHROMES) if (c.exitCode === null && !c.signalCode) c.kill('SIGKILL');
+  for (const p of PROFILES) try { rmSync(p, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 }); } catch { /* best effort */ }
+});
 for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => process.exit(130));
 const fail = e => { console.error('render failed:', e?.message || e); process.exit(1); };
 process.on('uncaughtException', fail);
@@ -40,9 +43,9 @@ async function openPage() {
   const prof = mkdtempSync(join(process.env.TMPDIR || tmpdir(), 'short-chrome-'));
   const chrome = spawn(CHROME, ['--headless=new', '--use-mock-keychain', '--password-store=basic', '--remote-debugging-port=0', `--user-data-dir=${prof}`, '--no-first-run',
     '--no-default-browser-check', '--hide-scrollbars', `--force-device-scale-factor=${DSF}`, `--window-size=${W},${H}`,
-    '--allow-file-access-from-files', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
-  CHROMES.add(chrome);
-  chrome.once('exit', () => { CHROMES.delete(chrome); try { rmSync(prof, { recursive: true, force: true }); } catch { /* still flushing */ } });
+    'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+  CHROMES.add(chrome); PROFILES.add(prof);
+  chrome.once('exit', () => { CHROMES.delete(chrome); try { rmSync(prof, { recursive: true, force: true }); PROFILES.delete(prof); } catch { /* still flushing */ } });
   const wsUrl = await new Promise((res, rej) => {
     let buf = '';
     chrome.stderr.on('data', d => { buf += d; const m = /DevTools listening on (ws:\/\/\S+)/.exec(buf); if (m) res(m[1]); });
@@ -116,9 +119,16 @@ if (mode === 'still') {
   for (const [k, t] of ts.entries()) writeFileSync(join(tmp, `f${String(k).padStart(3, '0')}.png`), await shot(t));
   mkdirSync(STILLS, { recursive: true });
   const rows = Math.ceil(ts.length / 6);
-  spawnSync('ffmpeg', ['-y', '-v', 'error', '-framerate', '1', '-i', join(tmp, 'f%03d.png'), '-vf',
-    `scale=270:480,drawtext=text='%{n}':x=8:y=8:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.6,tile=6x${rows}:padding=6:color=white`,
-    '-frames:v', '1', join(STILLS, 'sheet.png')], { stdio: 'inherit' });
+  // frame numbers need ffmpeg's drawtext (missing in some builds, e.g. Homebrew's): without it, tile unnumbered
+  const tile = label => spawnSync('ffmpeg', ['-y', '-v', 'error', '-framerate', '1', '-i', join(tmp, 'f%03d.png'), '-vf',
+    `scale=270:480,${label ? "drawtext=text='%{n}':x=8:y=8:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.6," : ''}tile=6x${rows}:padding=6:color=white`,
+    '-frames:v', '1', join(STILLS, 'sheet.png')], { stdio: ['ignore', 'ignore', 'pipe'] });
+  let r = tile(true);
+  if (r.status !== 0) {
+    console.warn('ffmpeg has no drawtext filter: contact sheet without frame numbers (count left to right, top to bottom from 0)');
+    r = tile(false);
+  }
+  if (r.status !== 0) fail('contact sheet: ' + String(r.stderr || '').trim());
   rmSync(tmp, { recursive: true, force: true });
   console.log('sheet', ts.map((t, k) => `${k}=${t}s`).join(' '));
 } else if (mode === 'full') {

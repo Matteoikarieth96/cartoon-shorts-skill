@@ -35,6 +35,9 @@ except ImportError:
     line(False, 'Python numpy', f'{sys.executable} -m pip install numpy')
 for tool in ('ffmpeg', 'ffprobe'):
     line(bool(shutil.which(tool)), tool, 'brew install ffmpeg' if mac else 'sudo apt install ffmpeg')
+if shutil.which('ffmpeg'):
+    line('drawtext' in out(['ffmpeg', '-hide_banner', '-filters']), 'ffmpeg drawtext (frame numbers on contact sheets)',
+         'optional: sheets still work, without numbers', required=False)
 chromes = [os.environ.get('CHROME_PATH', ''), '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
            '/Applications/Chromium.app/Contents/MacOS/Chromium', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable',
            '/usr/bin/chromium', '/usr/bin/chromium-browser', '/snap/bin/chromium', r'C:\Program Files\Google\Chrome\Application\chrome.exe']
