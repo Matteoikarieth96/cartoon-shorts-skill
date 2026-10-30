@@ -2,7 +2,7 @@
 // Scenes: wait (worry, rain, the envelope), open (eye close-up, the letter slides out), joy (ACCEPTED, tears of joy).
 // Every time is keyed to a voice line (L0 = line 0 starts, L3e = line 3 ends), so a re-voice keeps the cuts in sync.
 window.buildEpisode = (world, S) => {
-  const { E, scene, ov, camera, eout, clamp, T } = S;
+  const { E, scene, ov, ovText, camera, eout, clamp, T } = S;
   const { FX, INK } = Anime;
   const prog = (t, a, d) => clamp((t - T(a)) / d);
   const back = x => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
@@ -226,7 +226,8 @@ window.buildEpisode = (world, S) => {
       E('ellipse', { cx: 812, cy: 1170 + bob + 160 * lift, rx: 46, ry: 56, fill: LOOK.skin, stroke: INK, 'stroke-width': 4.5 }, g);
     });
     ov(sc, 'ACCEPTED!', 'left:60px;right:60px;top:210px;text-align:center;color:#ffd166;font-size:160px', 'stamp@L3', '', 'title');
-    ov(sc, 'AFTER 365 DAYS', 'left:60px;right:60px;top:392px;text-align:center;color:#fff6ec;font-size:56px', 'up@L4', '', 'kicker');
+    ovText(sc, 'AFTER 365 DAYS',   // ovText: plain text, never markup (use it for anything from research or the user)
+      'left:60px;right:60px;top:392px;text-align:center;color:#fff6ec;font-size:56px', 'up@L4', '', 'kicker');
     S.flashAt('L3', .9, .3);
     S.shake('L3', .35, 18);
     camera(sc, 'joy', 'joye', 1, 1.07, 540, 950);

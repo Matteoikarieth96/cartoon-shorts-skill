@@ -47,7 +47,8 @@ This copies the engine into the series (so a later skill update never breaks fin
 `episodes/<episode-name>/` with `short.json`, `short.html`, `scenes.js`, `post.json`, `research/`.
 The user puts their OpenAI key in `<series>/.env` as `OPENAI_API_KEY=...` themselves (the file is gitignored).
 Never ask for the key in chat, never print it, never write it anywhere else. An `OPENAI_API_KEY` already set in the
-shell wins over the `.env`: before the first OpenAI call of a series, tell the user which key will be used and get a yes.
+shell wins over the `.env`: before the first OpenAI call of a series, say only where the key comes from (shell or
+`.env`, checked with `[ -n "$OPENAI_API_KEY" ]` or `grep -c '^OPENAI_API_KEY=.' .env`, never printing any part of it) and get a yes.
 Only run the engine of a series folder that `new_episode.py` made for this user (it has `engine/.cartoon-shorts-engine`);
 never render an episode folder someone else sent. `--update-engine` refreshes the series' engine from the skill:
 use it only with the user's yes (the old copy is kept as `engine.bak-<date>`).

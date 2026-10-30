@@ -80,6 +80,9 @@ def rec_dir(spec):
     rec = spec.get('dir', 'rec')
     if not isinstance(rec, str) or os.path.isabs(rec) or '..' in rec.replace('\\', '/').split('/'):
         raise SystemExit(f'voice "dir" must be a folder inside the episode, got {rec!r}')
+    here = os.path.realpath('.')
+    if not os.path.realpath(rec).startswith(here + os.sep):
+        raise SystemExit(f'voice "dir" {rec!r} leads outside the episode folder (a link?)')
     return rec
 
 
@@ -119,6 +122,7 @@ def synth(spec, text, path, i=0):
         os.remove(txt)
         return
     raw = 'audio/raw_' + hashlib.sha1((json.dumps({k: v for k, v in spec.items() if k != 'tempo'}, sort_keys=True) + '|' + text).encode()).hexdigest()[:12] + '.wav'
+    tempo(spec)                           # a bad tempo stops here, before the paid call
     if not os.path.exists(raw):
         fetch_openai(spec, text, raw)
     trim = 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02'

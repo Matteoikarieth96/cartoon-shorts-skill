@@ -27,11 +27,16 @@ if not re.fullmatch(r'[a-z0-9][a-z0-9-]*', a.episode):
 series = os.path.abspath(os.path.expanduser(a.series))
 eng = os.path.join(series, 'engine')
 MARK = '.cartoon-shorts-engine'      # written into every engine copy: only those are ever replaced
+if os.path.lexists(eng) and (os.path.islink(eng) or not os.path.isfile(os.path.join(eng, MARK))):
+    # checked on every run: the episode commands run engine/ code, so it must be a copy this script made
+    sys.exit(f'{eng} was not made by this skill (or is a link): not using it. Pick another series folder.')
 if a.update_engine or not os.path.isdir(eng):
     if os.path.isdir(eng):
-        if not os.path.exists(os.path.join(eng, MARK)):
-            sys.exit(f'{eng} was not made by this skill: not touching it. Pick another series folder.')
-        bak = eng + '.bak-' + time.strftime('%Y%m%d-%H%M%S')
+        stamp, n = time.strftime('%Y%m%d-%H%M%S'), 0
+        bak = f'{eng}.bak-{stamp}'
+        while os.path.lexists(bak):
+            n += 1
+            bak = f'{eng}.bak-{stamp}-{n}'
         os.rename(eng, bak)               # kept, never deleted: older episodes may need the old engine
         print('old engine kept as', bak)
     shutil.copytree(os.path.join(SKILL, 'engine'), eng, ignore=shutil.ignore_patterns('__pycache__'))

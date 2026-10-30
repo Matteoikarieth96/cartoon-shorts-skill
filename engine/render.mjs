@@ -116,6 +116,7 @@ if (mode === 'still') {
   const step = +(rest[0] || 2), ts = [];
   for (let t = 0.5; t < info.total; t += step) ts.push(+t.toFixed(2));
   const tmp = mkdtempSync(join(process.env.TMPDIR || tmpdir(), 'sheet-'));
+  PROFILES.add(tmp);                      // removed by the exit handler too (fail(), Ctrl-C)
   for (const [k, t] of ts.entries()) writeFileSync(join(tmp, `f${String(k).padStart(3, '0')}.png`), await shot(t));
   mkdirSync(STILLS, { recursive: true });
   const rows = Math.ceil(ts.length / 6);

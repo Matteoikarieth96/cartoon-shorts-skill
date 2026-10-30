@@ -78,7 +78,7 @@ window.buildEpisode = (world, S) => {
     FX.burst(g, x, y, size * .75, size * 1.25, 12, fill, OL, 9, Math.round(x + y));
     FX.popIn(g, at, .3, x, y);
     showIn(g, at, until);
-    ov(sc, word, `left:${x - 400}px;width:800px;top:${y - size * .55}px;text-align:center;transform:rotate(${rot}deg)`, `slam@${at}`, `${at}..${until}`, 'word')
+    ov(sc, S.esc(word), `left:${x - 400}px;width:800px;top:${y - size * .55}px;text-align:center;transform:rotate(${rot}deg)`, `slam@${at}`, `${at}..${until}`, 'word')
       .style.fontSize = size + 'px';
   }
 

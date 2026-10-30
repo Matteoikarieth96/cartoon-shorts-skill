@@ -207,6 +207,27 @@ class Scaffold(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(self.series, baks[0], 'render.mjs')))
         self.assertTrue(os.path.exists(os.path.join(self.series, 'engine', '.cartoon-shorts-engine')))
 
+    def test_foreign_or_linked_engine_is_refused_on_every_run(self):
+        os.makedirs(os.path.join(self.series, 'engine'))
+        write(os.path.join(self.series, 'engine', 'audio.py'), 'print(1)')
+        self.assertNotEqual(new_episode(self.series, 'ep').returncode, 0)
+        self.assertFalse(os.path.exists(os.path.join(self.series, 'episodes', 'ep')))
+        other = os.path.join(self.tmp, 'other')
+        self.assertEqual(new_episode(other, 'one').returncode, 0)
+        linked = os.path.join(self.tmp, 'linked')
+        os.makedirs(linked)
+        os.symlink(os.path.join(other, 'engine'), os.path.join(linked, 'engine'))
+        self.assertNotEqual(new_episode(linked, 'ep').returncode, 0)
+        self.assertFalse(os.path.exists(os.path.join(linked, 'episodes', 'ep')))
+
+    def test_updates_in_the_same_second_keep_every_backup(self):
+        self.assertEqual(new_episode(self.series, 'one').returncode, 0)
+        for name in ('two', 'three', 'four'):
+            r = run([PY, os.path.join(ROOT, 'scripts', 'new_episode.py'), self.series, name, '--voice', 'file', '--update-engine'])
+            self.assertEqual(r.returncode, 0, r.stderr)
+        baks = [d for d in os.listdir(self.series) if d.startswith('engine.bak-')]
+        self.assertEqual(len(baks), 3)
+
     def test_existing_env_files_are_kept(self):
         os.makedirs(self.series)
         write(os.path.join(self.series, '.gitignore'), 'custom\n')
@@ -308,6 +329,17 @@ class Pipeline(unittest.TestCase):
         r = run([PY, os.path.join(self.series, 'engine', 'audio.py'), d])
         self.assertNotEqual(r.returncode, 0)
         self.assertIn('dir', r.stderr + r.stdout)
+
+    def test_recordings_folder_link_cannot_leave_the_episode(self):
+        outside = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, outside)
+        def linked(cfg):
+            cfg['voice']['dir'] = 'rec2'
+        d = self.variant('link-dir', short=linked)
+        os.symlink(outside, os.path.join(d, 'rec2'))
+        r = run([PY, os.path.join(self.series, 'engine', 'audio.py'), d])
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('outside the episode', r.stderr + r.stdout)
 
     @unittest.skipUnless(LOCAL_VOICE, 'needs macOS say or espeak-ng')
     def test_line_starting_with_a_dash_is_spoken_not_parsed(self):
