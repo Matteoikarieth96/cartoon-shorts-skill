@@ -1,0 +1,32 @@
+{
+  "title": "The kid who kept shooting",
+  "lang": "en",
+  "voice": {"engine": "say", "voice": "Samantha", "rate": 185},
+  "fallback": {"engine": "say", "voice": "Samantha", "rate": 185},
+  "lead": 0.3,
+  "gap": 0.1,
+  "scene_gap": 0.15,
+  "end_hold": 2.2,
+  "music_gain": 0.3,
+  "fx_gain": 0.5,
+  "amb_gain": 0.3,
+  "no_whoosh": [],
+  "score": [["0", "sad", 0.7], ["rain", "rise", 0.8], ["final", "tense", 0.9], ["L4-0.05", "triumph", 1.0]],
+  "sfx": [
+    ["0.05", "bounce", 0.5],
+    ["L0%70", "hit", 0.8], ["L1%8", "hit", 0.8], ["L1%42", "hit", 0.8], ["L1%76", "hit", 0.9],
+    ["rain+0.25", "flash", 0.5],
+    ["L2%35", "hit", 0.6], ["L2%88", "swish", 0.7],
+    ["final+0.1", "squeak", 0.5], ["L3%30", "riser", 0.6],
+    ["L4-0.45", "buzzer", 0.8],
+    ["L4-0.02", "swish", 1.0], ["L4-0.02", "impact", 0.9], ["L4+0.05", "cymbal", 0.6], ["L4%30", "sparkle", 0.6]
+  ],
+  "amb": [["rain", "raine", "rain", 0.9], ["final", "L4-0.05", "crowd", 0.5, 0.2], ["L4-0.05", "finale", "crowd", 1.0, 0.95]],
+  "lines": [
+    {"scene": "miss", "say": "Milo missed every shot.", "cap": "Milo missed *every shot.*"},
+    {"scene": "miss", "say": "Clank. Clank. Clank.", "cap": "Clank. Clank. *Clank.*"},
+    {"scene": "rain", "say": "So he practised every night, even in the rain.", "cap": "So he practised *every night,* even in *the rain.*"},
+    {"scene": "final", "say": "Then: last second, down by one.", "cap": "*Last second,* down by one."},
+    {"scene": "final", "say": "Swish! Buzzer-beater!", "cap": "*Swish!* Buzzer-beater!"}
+  ]
+}

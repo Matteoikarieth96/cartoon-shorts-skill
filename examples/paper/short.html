@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Last Night of the Lighthouse Keeper</title>
+<!-- Fonts: Google Fonts, loaded at render time (needs internet once; Chrome caches them). display=block avoids a fallback-font frame. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Inter:wght@600;800&family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&family=Nunito:wght@700;800;900&display=block">
+<link rel="stylesheet" href="../../engine/core.css">
+<style>
+/* "paper and light": soft documentary captions, paper grain over the whole frame */
+:root{--ink:#0b1020;--paper:#f7eedb;--gold:#ffd97a}
+#v{background:#05070f}
+#cap{z-index:10;font:900 76px/1.04 'Fraunces',serif;text-transform:none;letter-spacing:0;color:#fbf6ea;-webkit-text-stroke:0;
+  text-shadow:0 4px 18px rgba(0,0,0,.85),0 2px 3px rgba(0,0,0,.9);filter:none}
+#cap b{color:var(--gold);font-style:italic;font-weight:900}
+#paper{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.35;background-size:512px 512px}
+#vig{background:radial-gradient(ellipse 80% 62% at 50% 44%,transparent 50%,rgba(0,0,0,.6) 100%)}
+#grain{opacity:.06}
+</style>
+</head>
+<body>
+<div id="v">
+  <div id="world"></div>
+  <div id="flash"></div>
+  <div id="paper"></div>
+  <div id="vig"></div>
+  <div id="grain"></div>
+  <div id="cap"></div>
+</div>
+<script src="timeline.js"></script>
+<!-- paper.js needs toon.js first (full-body silhouettes use the Toon rig) -->
+<script src="../../engine/styles/toon.js"></script>
+<script src="../../engine/styles/paper.js"></script>
+<script src="../../engine/core.js"></script>
+<script src="scenes.js"></script>
+<script>
+document.getElementById('paper').style.backgroundImage = `url(${Paper.paperTile()})`;
+Short.start(async () => buildEpisode(document.getElementById('world'), Short),
+  {fonts: ['900 100px Fraunces', 'italic 900 100px Fraunces', '400 100px Anton']});
+</script>
+</body>
+</html>

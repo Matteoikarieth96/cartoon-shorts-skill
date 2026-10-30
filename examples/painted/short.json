@@ -1,0 +1,35 @@
+{
+  "title": "Tomato pasta in 15 minutes, for 2 euros",
+  "lang": "en",
+  "voice": {"engine": "say", "voice": "Samantha", "rate": 180},
+  "fallback": {"engine": "say", "voice": "Samantha", "rate": 180},
+  "lead": 0.35,
+  "gap": 0.1,
+  "scene_gap": 0.15,
+  "end_hold": 2.0,
+  "music_gain": 0.3,
+  "fx_gain": 0.5,
+  "amb_gain": 0.35,
+  "no_whoosh": ["plate"],
+  "score": [["0", "waltz", 0.7], ["plate", "waltz", 1.1]],
+  "sfx": [
+    ["0.05", "sparkle", 0.35],
+    ["L0%45", "pop", 0.4],
+    ["L0%70", "pop", 0.4],
+    ["L1%15", "chops", 0.5],
+    ["L1%45", "pour", 0.35],
+    ["L1%62", "plop", 0.4],
+    ["L1%72", "plop", 0.4],
+    ["L1%82", "plop", 0.4],
+    ["L3%15", "swish", 0.3],
+    ["L3%60", "sparkle", 0.4],
+    ["L3e", "ding", 0.35]
+  ],
+  "amb": [["L1%50", "kitchene", "sizzle", 0.8], ["L2", "kitchene", "boil", 0.35]],
+  "lines": [
+    {"scene": "hook", "say": "Tomato pasta. Fifteen minutes, two euros.", "cap": "Tomato pasta. *15 minutes,* *2 euros.*"},
+    {"scene": "kitchen", "say": "Warm garlic in olive oil, then crush in the tomatoes.", "cap": "Warm *garlic* in olive oil, then crush in *the tomatoes.*"},
+    {"scene": "kitchen", "say": "Let it bubble while the pasta cooks.", "cap": "Let it *bubble* while the pasta cooks."},
+    {"scene": "plate", "say": "Toss it together, add basil. Dinner for two!", "cap": "Toss it together, add *basil.* *Dinner for two!*"}
+  ]
+}

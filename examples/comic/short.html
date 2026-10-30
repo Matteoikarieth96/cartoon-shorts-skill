@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The kid who kept shooting</title>
+<!-- Fonts: Google Fonts, loaded at render time (needs internet once; Chrome caches them). display=block avoids a fallback-font frame. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Inter:wght@600;800&family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&family=Nunito:wght@700;800;900&display=block">
+<link rel="stylesheet" href="../../engine/core.css">
+<style>
+/* Episode look: override the palette and the caption font here. Keep captions inside y 1340..1560 and away from the right edge. */
+:root{--ink:#17111b;--paper:#fbf3e4;--gold:#ffb81c;--red:#e8343d;--sky:#4fb3ff}
+#v{background:#1b1630}
+.board{left:90px;right:90px;top:190px;height:116px;display:flex;align-items:stretch;border:7px solid var(--ink);border-radius:20px;overflow:hidden;box-shadow:0 10px 0 rgba(0,0,0,.45);font-family:var(--title)}
+.board .tm{flex:1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:40px;letter-spacing:.08em;color:#fff;background:linear-gradient(#2a2440,#15121f)}
+.board .tm b{font-size:80px;font-weight:400;letter-spacing:0;color:var(--gold)}
+.board .clk{width:200px;background:var(--paper);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:74px;border-left:7px solid var(--ink);border-right:7px solid var(--ink)}
+.word{font:400 150px/1 var(--comic);letter-spacing:.03em;color:#fff;-webkit-text-stroke:14px var(--ink);paint-order:stroke fill;filter:drop-shadow(8px 10px 0 var(--ink))}
+</style>
+</head>
+<body>
+<div id="v">
+  <div id="world"></div>
+  <div id="flash"></div>
+  <div id="vig"></div>
+  <div id="grain"></div>
+  <div id="cap"></div>
+</div>
+<script src="timeline.js"></script>
+<!-- comic style: toon.js (puppets) and fx.js (set pieces), both before core.js -->
+<script src="../../engine/styles/toon.js"></script>
+<script src="../../engine/styles/fx.js"></script>
+<script src="../../engine/core.js"></script>
+<script src="scenes.js"></script>
+<script>
+Short.start(async () => buildEpisode(document.getElementById('world'), Short),
+  {fonts: ['400 100px Anton', '400 100px Bangers', '800 30px Inter']});
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "title": "The Last Night of the Lighthouse Keeper",
+  "lang": "en",
+  "voice": {"engine": "say", "voice": "Samantha", "rate": 175},
+  "fallback": {"engine": "say", "voice": "Samantha", "rate": 175},
+  "lead": 0.3,
+  "gap": 0.2,
+  "scene_gap": 0.35,
+  "end_hold": 2.4,
+  "music_gain": 0.32,
+  "fx_gain": 0.5,
+  "amb_gain": 0.35,
+  "no_whoosh": ["last", "shore"],
+  "score": [["0", "warm", 0.7], ["last", "tears", 0.8], ["shore", "promise", 1.0]],
+  "sfx": [["0.15", "flash", 0.35], ["L1%50", "ding", 0.25], ["last-0.2", "riser", 0.3], ["L3%35", "sparkle", 0.35], ["L3%70", "sparkle", 0.3], ["L4", "ding", 0.3]],
+  "amb": [["0", "laste", "wind", 0.7], ["shore", "shoree", "wind", 0.5]],
+  "lines": [
+    {"scene": "lamp", "say": "For forty years, one man lit the lighthouse lamp.", "cap": "For *forty years,* one man lit the lamp."},
+    {"scene": "lamp", "say": "Every single night.", "cap": "Every *single night.*"},
+    {"scene": "last", "say": "Tonight, he climbs the stairs for the last time.", "cap": "Tonight, he climbs for the *last time.*"},
+    {"scene": "shore", "say": "And down on the shore, the whole village lights a candle.", "cap": "Down on the shore, the *whole village* lights a candle."},
+    {"scene": "shore", "say": "For him.", "cap": "*For him.*"}
+  ]
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Letter (anime example)</title>
+<!-- Fonts: Google Fonts, loaded at render time (needs internet once; Chrome caches them). display=block avoids a fallback-font frame. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Inter:wght@600;800&family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&family=Nunito:wght@700;800;900&display=block">
+<link rel="stylesheet" href="../../engine/core.css">
+<style>
+/* Anime look: soft night blues that turn to warm pink and gold. Captions stay in y 1340..1560. */
+:root{--ink:#2b1a14;--paper:#fff6ec;--gold:#ffd166;--red:#e8546b;--sky:#8ec5ff}
+#v{background:#1d1a3a}
+#cap{-webkit-text-stroke:16px #2b1a3a}
+#cap b{color:#ffd166}
+.letter{font:800 30px/1.35 var(--body);color:#5b4a66;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div id="v">
+  <div id="world"></div>
+  <div id="flash"></div>
+  <div id="vig"></div>
+  <div id="grain"></div>
+  <div id="cap"></div>
+</div>
+<script src="timeline.js"></script>
+<!-- style module: anime.js (window.Anime) must load before core.js and scenes.js -->
+<script src="../../engine/styles/anime.js"></script>
+<script src="../../engine/core.js"></script>
+<script src="scenes.js"></script>
+<script>
+Short.start(async () => buildEpisode(document.getElementById('world'), Short),
+  {fonts: ['400 100px Anton', '400 100px Bangers', '800 30px Inter', 'italic 900 100px Fraunces']});
+</script>
+</body>
+</html>

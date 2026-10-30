@@ -1,0 +1,24 @@
+{
+  "title": "The Letter",
+  "lang": "en",
+  "voice": {"engine": "say", "voice": "Samantha", "rate": 185},
+  "fallback": {"engine": "say", "voice": "Samantha", "rate": 185},
+  "lead": 0.3,
+  "gap": 0.12,
+  "scene_gap": 0.2,
+  "end_hold": 2.5,
+  "music_gain": 0.3,
+  "fx_gain": 0.5,
+  "amb_gain": 0.25,
+  "no_whoosh": [],
+  "score": [["wait", "tense", 0.9], ["open", "rise", 0.8], ["joy", "tears", 1.0]],
+  "sfx": [["L1%20", "heartbeat", 0.7], ["L2%15", "swish", 0.7], ["L2%45", "riser", 0.5], ["L3", "cymbal", 0.5], ["L3", "sparkle", 0.7], ["L4%40", "sparkle", 0.5]],
+  "amb": [["wait", "waite", "rain", 0.6]],
+  "lines": [
+    {"scene": "wait", "say": "One year of waiting. One envelope.", "cap": "One *year* of waiting."},
+    {"scene": "wait", "say": "Her hands will not stop shaking.", "cap": "Her hands *won't stop shaking.*"},
+    {"scene": "open", "say": "She tears it open, and reads the first word.", "cap": "She reads the *first word.*"},
+    {"scene": "joy", "say": "Accepted.", "cap": "*Accepted.*", "after": 0.45},
+    {"scene": "joy", "say": "Worth every single day.", "cap": "Worth *every single day.*"}
+  ]
+}

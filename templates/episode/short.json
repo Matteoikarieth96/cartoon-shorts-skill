@@ -1,0 +1,28 @@
+{
+  "title": "Episode title",
+  "lang": "en",
+  "voice": {
+    "engine": "openai",
+    "model": "gpt-4o-mini-tts",
+    "voice": "coral",
+    "tempo": 1.2,
+    "instructions": "Speak English, warm and lively, clear and easy to follow. Short punchy sentences, a smile in the voice."
+  },
+  "lead": 0.3,
+  "gap": 0.1,
+  "scene_gap": 0.15,
+  "end_hold": 2.2,
+  "music_gain": 0.3,
+  "fx_gain": 0.5,
+  "amb_gain": 0.3,
+  "no_whoosh": ["end"],
+  "score": [["0", "rise", 0.8], ["end", "end", 1.0]],
+  "sfx": [["0.05", "impact", 0.5], ["L1%40", "pop", 0.4], ["L2%40", "pop", 0.4]],
+  "amb": [],
+  "lines": [
+    {"scene": "hook", "say": "Three seconds. That's all you get.", "cap": "*Three seconds.* That's all you get."},
+    {"scene": "points", "say": "Show the payoff first.", "cap": "Show the *payoff* first."},
+    {"scene": "points", "say": "Then tell the story behind it.", "cap": "Then tell the *story.*"},
+    {"scene": "end", "say": "What should we animate next? Comment below.", "cap": "What next? *Comment below.*"}
+  ]
+}

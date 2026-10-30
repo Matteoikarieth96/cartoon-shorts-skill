@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Episode</title>
+<!-- Fonts: Google Fonts, loaded at render time (needs internet once; Chrome caches them). display=block avoids a fallback-font frame. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Inter:wght@600;800&family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&family=Nunito:wght@700;800;900&display=block">
+<link rel="stylesheet" href="../../engine/core.css">
+<style>
+/* Episode look: override the palette and the caption font here. Keep captions inside y 1340..1560 and away from the right edge. */
+:root{--ink:#17111b;--paper:#fbf3e4;--gold:#ffb81c;--red:#e8343d;--sky:#4fb3ff}
+#v{background:#1b1630}
+</style>
+</head>
+<body>
+<div id="v">
+  <div id="world"></div>
+  <div id="flash"></div>
+  <div id="vig"></div>
+  <div id="grain"></div>
+  <div id="cap"></div>
+</div>
+<script src="timeline.js"></script>
+<!-- STYLE MODULES: keep the ones this episode uses (order matters: toon before paper, anime before manga)
+<script src="../../engine/styles/toon.js"></script>
+<script src="../../engine/styles/fx.js"></script>
+<script src="../../engine/styles/anime.js"></script>
+<script src="../../engine/styles/manga.js"></script>
+<script src="../../engine/styles/paper.js"></script>
+<script src="../../engine/styles/painted.js"></script>
+-->
+<script src="../../engine/core.js"></script>
+<script src="scenes.js"></script>
+<script>
+Short.start(async () => buildEpisode(document.getElementById('world'), Short),
+  {fonts: ['400 100px Anton', '400 100px Bangers', '800 30px Inter']});
+</script>
+</body>
+</html>

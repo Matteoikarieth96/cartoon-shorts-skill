@@ -1,0 +1,24 @@
+{
+  "title": "The Street Cook's Vow",
+  "lang": "en",
+  "voice": {"engine": "say", "voice": "Daniel", "rate": 190},
+  "fallback": {"engine": "say", "voice": "Samantha", "rate": 185},
+  "lead": 0.3,
+  "gap": 0.1,
+  "scene_gap": 0.15,
+  "end_hold": 1.8,
+  "music_gain": 0.3,
+  "fx_gain": 0.5,
+  "amb_gain": 0.3,
+  "no_whoosh": [],
+  "score": [["0", "promise", 0.8], ["laugh", "tense", 0.8], ["win", "rise", 0.9], ["L4", "triumph", 1.0]],
+  "sfx": [["0.05", "impact", 0.5], ["L1", "taiko", 0.7], ["L2%15", "buzzer", 0.4], ["L3%25", "chops", 0.5], ["L4", "impact", 0.9], ["L4", "cymbal", 0.6], ["L4%40", "sparkle", 0.5]],
+  "amb": [["0", "vowe", "sizzle", 0.4], ["laugh", "laughe", "crowd", 0.7, 0.6], ["win", "L4", "sizzle", 0.8]],
+  "lines": [
+    {"scene": "vow", "say": "In a tiny town, a street food cook made a vow.", "cap": "A street cook made a *vow.*"},
+    {"scene": "vow", "say": "I will win the city cooking contest!", "cap": "\"I will *win* the contest!\""},
+    {"scene": "laugh", "say": "The whole city laughed at him.", "cap": "The whole city *laughed.*"},
+    {"scene": "win", "say": "He just grinned. And cooked.", "cap": "He just *grinned.* And cooked."},
+    {"scene": "win", "say": "First prize. Tears of joy.", "cap": "*First prize.* Tears of joy."}
+  ]
+}
