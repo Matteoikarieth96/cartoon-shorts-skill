@@ -115,6 +115,7 @@ skip into a failure).
 - [ai-privacy-check](https://github.com/Matteoikarieth96/ai-privacy-check-skill): a first privacy and AI rules check for a concrete use case in Italy and the EU (in Italian)
 - [x2d-print](https://github.com/Matteoikarieth96/x2d-print-skill): STL parts to a ready-to-print Bambu Studio project for the Bambu Lab X2D, with a beginner guide
 - [launch-video](https://github.com/Matteoikarieth96/launch-video-skill): launch videos for apps and websites in 16:9 and 9:16, light and dark, rendered locally from the real site
+- [notion-todo](https://github.com/Matteoikarieth96/notion-todo-skill): run your Notion to-do lists from plain sentences, never mixing one list with another
 
 ## License
 
