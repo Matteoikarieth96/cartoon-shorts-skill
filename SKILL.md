@@ -1,6 +1,6 @@
 ---
 name: cartoon-shorts
-description: Make vertical (9:16) animated cartoon shorts for YouTube Shorts, TikTok and Instagram Reels, 15 to 90 s, with a local code engine - SVG scenes keyed to the voice-over, synthesized music and effects, captions, a master-quality MP4 and an upload kit per platform. It always starts with an interview (topic, goal, audience, language, length, style, tone, narrator, voice, ending), then fact-checks, proposes story structures, writes a script for approval, shows test frames, renders and packages. Styles - comic puppets, anime, bold manga, cut paper and light, painted storybook, kinetic text. Use it whenever someone wants a vertical cartoon or animated video for social media, a series of shorts, a recipe, story or explainer reel, or says "fammi un reel", "video per TikTok", "short animato", "cartone animato", "make a cartoon short", even without saying "skill". Not for editing real footage, 16:9 videos, whiteboard explainers, web or CSS animations, or AI image or video generation.
+description: Make vertical (9:16) animated cartoon shorts for Shorts, TikTok and Reels, rendered locally to MP4 with voice-over, music, captions and an upload kit. Use when someone wants a cartoon or animated video for social media, or says "fammi un reel", "video per TikTok", "short animato", "cartone animato". Not for launch videos (launch-video), whiteboard explainers (whiteboard-video) or real footage.
 ---
 
 # Cartoon shorts
@@ -131,6 +131,7 @@ for the user unless they explicitly ask, and then only with their own tools and 
 
 ## Rules that hold for every video
 
+- **Scope.** Vertical 9:16 shorts of 15 to 90 s. Not for 16:9 videos, editing real footage, web or CSS animations, or AI image or video generation.
 - **Hook in frame 0.** The subject (dish, person, question, number) is readable on the very first frame. No logo intros.
 - **Fast.** Tempo 1.2 to 1.35, gaps of 0.1 s, a visual change at least every 2 to 3 s. Cut anything that is not story.
 - **One thread.** A short is one story with one emotional line, not a list of facts.
